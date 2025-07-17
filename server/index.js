@@ -10,13 +10,20 @@ const authRoutes = require('./routes/auth');
 const groupRoutes = require('./routes/groups');
 const studentRoutes = require('./routes/students');
 const attendanceRoutes = require('./routes/attendance');
+const chatRoutes = require('./routes/chat');
+const individualLessonsRoutes = require('./routes/individual-lessons');
 const healthRoutes = require('./routes/health');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3002', 'http://89.104.71.170', 'capacitor://localhost', 'ionic://localhost'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 
 // Swagger configuration
@@ -46,10 +53,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/individual-lessons', individualLessonsRoutes);
 app.use('/api', healthRoutes);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dance-school', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/dance-school', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

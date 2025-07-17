@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Table, Modal, Form, Alert, Badge, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import { FaPlus, FaEdit, FaTrash, FaPhone, FaGraduationCap } from 'react-icons/fa';
+import api from '../utils/api';
+import { 
+  FaPlus, 
+  FaEdit, 
+  FaTrash, 
+  FaPhone, 
+  FaGraduationCap,
+  FaUsers,
+  FaUserGraduate,
+  FaUserCheck,
+  FaUserTimes
+} from 'react-icons/fa';
 
 const Students = () => {
   const { user } = useAuth();
   const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -19,37 +29,37 @@ const Students = () => {
 
   useEffect(() => {
     fetchStudents();
+    fetchGroups();
   }, []);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/students');
+      const response = await api.get('/api/students');
       setStudents(response.data);
     } catch (error) {
       console.error('Error fetching students:', error);
-      setError('Ошибка при загрузке студентов');
+      if (error.response?.status === 401) {
+        setError('Ошибка авторизации. Пожалуйста, войдите в систему заново.');
+      } else if (error.response?.status === 403) {
+        setError('У вас нет прав для просмотра студентов');
+      } else {
+        setError('Ошибка при загрузке студентов');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const fetchGroups = async () => {
     try {
-      if (editingStudent) {
-        await axios.put(`/api/students/${editingStudent._id}`, formData);
-      } else {
-        await axios.post('/api/students', formData);
-      }
-      
-      setShowModal(false);
-      setEditingStudent(null);
-      resetForm();
-      fetchStudents();
+      const response = await api.get('/api/groups');
+      setGroups(response.data);
     } catch (error) {
-      console.error('Error saving student:', error);
-      setError('Ошибка при сохранении студента');
+      console.error('Error fetching groups:', error);
+      if (error.response?.status === 401) {
+        setError('Ошибка авторизации при загрузке групп');
+      }
     }
   };
 
@@ -63,64 +73,94 @@ const Students = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (studentId) => {
-    if (window.confirm('Вы уверены, что хотите удалить этого студента?')) {
-      try {
-        await axios.delete(`/api/students/${studentId}`);
-        fetchStudents();
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        setError('Ошибка при удалении студента');
-      }
-    }
-  };
-
-  const resetForm = () => {
+  const handleCreate = () => {
+    setEditingStudent(null);
     setFormData({
       name: '',
       phone: '',
       isActive: true
     });
+    setShowModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingStudent(null);
-    resetForm();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingStudent) {
+        await api.put(`/api/students/${editingStudent._id}`, formData);
+      } else {
+        await api.post('/api/students', formData);
+      }
+      await fetchStudents();
+      setShowModal(false);
+      setError('');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка при сохранении студента');
+    }
+  };
+
+  const handleDelete = async (studentId) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этого студента?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/api/students/${studentId}`);
+      await fetchStudents();
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка при удалении студента');
+    }
   };
 
   if (loading) {
     return (
-      <div className="loading-spinner">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Загрузка...</span>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white/60">Загрузка...</div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Студенты</h2>
-        {(user?.role === 'teacher' || user?.role === 'admin') && (
-          <Button variant="primary" onClick={() => setShowModal(true)}>
-            <FaPlus className="me-2" />
-            Добавить студента
-          </Button>
-        )}
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="container py-8">
+          <h1 className="page-title flex items-center gap-3">
+            <FaGraduationCap />
+            Студенты
+          </h1>
+          <p className="page-subtitle">
+            Управление базой данных студентов
+          </p>
+        </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="mb-4">
-          {error}
-        </Alert>
-      )}
+      <div className="container">
+        {error && (
+          <div className="alert alert-error mb-6">
+            {error}
+          </div>
+        )}
 
-      <Card>
-        <Card.Body>
-          <div className="table-responsive">
-            <Table hover>
+        {/* Actions */}
+        <div className="mb-6">
+          <button 
+            onClick={handleCreate}
+            className="btn btn-primary"
+          >
+            <FaPlus className="mr-2" />
+            Добавить студента
+          </button>
+        </div>
+
+        {/* Students Table */}
+        <div className="card">
+          <div className="card-header">
+            <h3 className="text-xl font-semibold text-white mb-0">
+              Список студентов ({students.length})
+            </h3>
+          </div>
+          <div className="table-container">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Имя</th>
@@ -133,115 +173,141 @@ const Students = () => {
               <tbody>
                 {students.map((student) => (
                   <tr key={student._id}>
-                    <td>
-                      <strong>{student.name}</strong>
+                    <td className="font-medium text-white">
+                      {student.name}
                     </td>
                     <td>
                       {student.phone ? (
-                        <>
-                          <FaPhone className="me-1" />
+                        <div className="flex items-center gap-2">
+                          <FaPhone size={12} />
                           {student.phone}
-                        </>
+                        </div>
                       ) : (
-                        <span className="text-muted">Не указан</span>
+                        <span className="text-white/40">Не указан</span>
                       )}
                     </td>
                     <td>
-                      {student.groups && student.groups.length > 0 ? (
-                        <div>
-                          {student.groups.map((group, index) => (
-                            <Badge key={group._id} bg="info" className="me-1">
+                      {student.groups?.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {student.groups.map(group => (
+                            <span key={group._id} className="badge badge-info">
                               {group.name}
-                            </Badge>
+                            </span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-muted">Не в группах</span>
+                        <span className="text-white/40">Нет групп</span>
                       )}
                     </td>
                     <td>
-                      <Badge bg={student.isActive ? 'success' : 'secondary'}>
+                      <span className={`badge ${student.isActive ? 'badge-success' : 'badge-danger'}`}>
                         {student.isActive ? 'Активен' : 'Неактивен'}
-                      </Badge>
+                      </span>
                     </td>
                     <td>
-                      {(user?.role === 'teacher' || user?.role === 'admin') && (
-                        <>
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            className="me-2"
-                            onClick={() => handleEdit(student)}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(student)}
+                          className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white"
+                          title="Редактировать"
+                        >
+                          <FaEdit />
+                        </button>
+                        {user?.role === 'admin' && (
+                          <button
+                            onClick={() => handleDelete(student._id)}
+                            className="btn btn-sm bg-red-600 hover:bg-red-700 text-white"
+                            title="Удалить"
                           >
-                            <FaEdit />
-                          </Button>
-                          {user?.role === 'admin' && (
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => handleDelete(student._id)}
-                            >
-                              <FaTrash />
-                            </Button>
-                          )}
-                        </>
-                      )}
+                            <FaTrash />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
+                {students.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="text-center py-8">
+                      <div className="text-white/60">
+                        <FaUserGraduate className="mx-auto mb-3" size={48} />
+                        <p>Студенты не найдены</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
-            </Table>
+            </table>
           </div>
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
-      {/* Modal для создания/редактирования студента */}
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingStudent ? 'Редактировать студента' : 'Добавить нового студента'}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Имя студента *</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-                placeholder="Введите имя студента"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Телефон</Form.Label>
-              <Form.Control
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                placeholder="+7 (999) 123-45-67"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="checkbox"
-                label="Студент активен"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Отмена
-            </Button>
-            <Button variant="primary" type="submit">
-              {editingStudent ? 'Сохранить' : 'Добавить'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      {/* Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {editingStudent ? 'Редактировать студента' : 'Добавить студента'}
+              </h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="modal-close"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Имя студента</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Телефон</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+7 (999) 123-45-67"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  />
+                  <span className="text-white">Активный студент</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="btn btn-primary">
+                  {editingStudent ? 'Сохранить' : 'Создать'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowModal(false)}
+                  className="btn btn-outline"
+                >
+                  Отмена
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,10 +6,14 @@ const groupSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  teachers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  // Оставляем teacher для обратной совместимости
   teacher: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'User'
   },
   room: {
     type: String,
@@ -34,10 +38,23 @@ const groupSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
+});
+
+// Автоматически добавляем основного учителя в массив teachers
+groupSchema.pre('save', function(next) {
+  if (this.teacher && (!this.teachers || !this.teachers.includes(this.teacher))) {
+    if (!this.teachers) this.teachers = [];
+    this.teachers.push(this.teacher);
+  }
+  next();
 });
 
 module.exports = mongoose.model('Group', groupSchema); 

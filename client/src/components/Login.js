@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { Card, Form, Button, Alert, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaGraduationCap, FaSpinner, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -24,12 +23,13 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
 
     const result = await login(formData.username, formData.password);
     
     if (result.success) {
+      // Перенаправляем на главную страницу после успешного входа
       navigate('/dashboard');
     } else {
       setError(result.message);
@@ -39,78 +39,139 @@ const Login = () => {
   };
 
   return (
-    <Row className="justify-content-center">
-      <Col md={6} lg={4}>
-        <Card className="shadow">
-          <Card.Body className="p-4">
-            <div className="text-center mb-4">
-              <h2 className="mb-3">🕺 Школа Танцев</h2>
-              <h4>Вход в систему</h4>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-900 via-dark-800 to-primary-900 p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-dance-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-secondary-500/5 rounded-full blur-3xl animate-bounce-slow"></div>
+      </div>
+
+      {/* Login Card */}
+      <div className="glass-modal w-full max-w-md relative z-10 animate-scale-in">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-500 to-dance-500 rounded-full mb-4 shadow-dance animate-float">
+            <FaMusic className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Школа Танцев
+          </h1>
+          <p className="text-lg text-white/80">Войдите в свой аккаунт</p>
+        </div>
+
+        {/* Error Alert */}
+        {error && (
+          <div className="alert-error mb-6 animate-slide-up">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-base">{error}</span>
             </div>
+          </div>
+        )}
 
-            {error && (
-              <Alert variant="danger" className="mb-3">
-                {error}
-              </Alert>
-            )}
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="form-group">
+            <label className="form-label text-lg text-white/95 mb-3 flex items-center gap-2">
+              <FaGraduationCap className="w-5 h-5" />
+              Имя пользователя
+            </label>
+            <input
+              type="text"
+              name="username"
+              className="form-control text-lg py-4 px-4"
+              placeholder="Введите ваше имя пользователя"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </div>
 
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Имя пользователя</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  placeholder="Введите имя пользователя"
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-4">
-                <Form.Label>Пароль</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="Введите пароль"
-                />
-              </Form.Group>
-
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-100 mb-3"
+          <div className="form-group">
+            <label className="form-label text-lg text-white/95 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              Пароль
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                className="form-control pr-14 text-lg py-4 px-4"
+                placeholder="Введите ваш пароль"
+                value={formData.password}
+                onChange={handleChange}
+                required
                 disabled={loading}
+              />
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors p-2"
+                onClick={() => setShowPassword(!showPassword)}
               >
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" />
-                    Вход...
-                  </>
-                ) : (
-                  <>
-                    <FaSignInAlt className="me-2" />
-                    Войти
-                  </>
-                )}
-              </Button>
+                {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
 
-              <div className="text-center">
-                <p className="mb-0">
-                  Нет аккаунта?{' '}
-                  <Link to="/register" className="text-decoration-none">
-                    Зарегистрироваться
-                  </Link>
-                </p>
-              </div>
-            </Form>
-          </Card.Body>
-        </Card>
-      </Col>
-    </Row>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full py-4 text-lg font-semibold relative overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-dance-500/20 to-primary-500/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+            <div className="relative flex items-center justify-center gap-3">
+              {loading ? (
+                <>
+                  <FaSpinner className="animate-spin w-5 h-5" />
+                  <span>Вход в систему...</span>
+                </>
+              ) : (
+                <>
+                  <FaGraduationCap className="w-5 h-5" />
+                  <span>Войти</span>
+                </>
+              )}
+            </div>
+          </button>
+        </form>
+
+        {/* Register Link */}
+        <div className="mt-8 text-center">
+          <p className="text-white/70 mb-4 text-lg">Нет аккаунта?</p>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-3 text-primary-400 hover:text-primary-300 transition-colors font-medium text-lg"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+            </svg>
+            Создать аккаунт
+          </Link>
+        </div>
+
+        {/* Demo Credentials */}
+        <div className="mt-8 p-6 glass-card-dark rounded-lg">
+          <h3 className="text-lg font-semibold text-white/95 mb-3">Демо-доступ:</h3>
+          <div className="text-base text-white/80 space-y-2">
+            <div><strong className="text-white/95">Админ:</strong> admin2 / admin123</div>
+            <div><strong className="text-white/95">Учитель:</strong> teacher / teacher123</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center">
+        <p className="text-white/60 text-base">
+          © 2024 Система управления танцевальной школой
+        </p>
+      </div>
+    </div>
   );
 };
 

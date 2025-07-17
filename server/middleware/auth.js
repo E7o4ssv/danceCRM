@@ -54,14 +54,26 @@ const isGroupTeacher = async (req, res, next) => {
       return res.status(404).json({ message: 'Group not found' });
     }
 
-    if (group.teacher.toString() !== req.user._id.toString()) {
+    const userId = req.user._id.toString();
+    
+    // Проверяем, что пользователь является учителем этой группы
+    const isInTeachersArray = group.teachers && group.teachers.some(teacherId => 
+      teacherId.toString() === userId
+    );
+    const isMainTeacher = group.teacher && group.teacher.toString() === userId;
+    
+    const isTeacherInGroup = isInTeachersArray || isMainTeacher;
+
+    // Debug info removed for production
+
+    if (!isTeacherInGroup) {
       return res.status(403).json({ message: 'Access denied. You can only manage your own groups.' });
     }
 
     req.group = group;
     next();
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 

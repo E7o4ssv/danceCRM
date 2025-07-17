@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -16,21 +16,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Настройка axios для автоматического добавления токена
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
-  }, [token]);
+  // API interceptors уже настроены в utils/api.js
 
   // Проверка токена при загрузке
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
-          const response = await axios.get('/api/auth/me');
+          const response = await api.get('/api/auth/me');
           setUser(response.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -47,10 +40,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post('/api/auth/login', {
+      console.log('Attempting login with:', { username, password });
+      
+      const response = await api.post('/api/auth/login', {
         username,
         password
       });
+      
+      console.log('Login response:', response.data);
       
       const { token: newToken, user: userData } = response.data;
       
@@ -58,8 +55,13 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
       
+      console.log('Login successful, user set:', userData);
+      
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
+      
       return {
         success: false,
         message: error.response?.data?.message || 'Ошибка входа'
@@ -69,7 +71,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       
       const { token: newToken, user: newUser } = response.data;
       
@@ -90,14 +92,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    // Перенаправляем на страницу входа
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  };
+
+  const getAuthToken = () => {
+    return token;
   };
 
   const value = {
     user,
     loading,
+    token,
     login,
     register,
-    logout
+    logout,
+    getAuthToken
   };
 
   return (

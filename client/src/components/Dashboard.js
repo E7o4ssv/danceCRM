@@ -1,237 +1,252 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import { FaUsers, FaGraduationCap, FaCalendarCheck, FaChartBar } from 'react-icons/fa';
+import api from '../utils/api';
+import { 
+  FaUsers, 
+  FaGraduationCap, 
+  FaCalendarCheck,
+  FaChartLine,
+  FaCalendarDay,
+  FaClock
+} from 'react-icons/fa';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({
-    groups: 0,
-    students: 0,
-    attendance: 0,
+    totalGroups: 0,
+    totalStudents: 0,
     recentAttendance: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        
-        // Получаем статистику в зависимости от роли пользователя
-        const [groupsRes, studentsRes, attendanceRes] = await Promise.all([
-          axios.get('/api/groups'),
-          axios.get('/api/students'),
-          axios.get('/api/attendance?limit=5')
-        ]);
-
-        setStats({
-          groups: groupsRes.data.length,
-          students: studentsRes.data.length,
-          attendance: attendanceRes.data.length,
-          recentAttendance: attendanceRes.data.slice(0, 5)
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        setError('Ошибка при загрузке статистики');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [groupsResponse, studentsResponse, attendanceResponse] = await Promise.all([
+        api.get('/api/groups'),
+        api.get('/api/students'),
+        api.get('/api/attendance?limit=5')
+      ]);
+
+      setStats({
+        totalGroups: groupsResponse.data?.length || 0,
+        totalStudents: studentsResponse.data?.length || 0,
+        recentAttendance: attendanceResponse.data || []
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setError('Ошибка при загрузке статистики');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'short'
+    });
+  };
 
   if (loading) {
     return (
-      <div className="loading-spinner">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Загрузка...</span>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-card">
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-white/70">Загрузка данных...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="dashboard-stats">
-        <h2>Добро пожаловать, {user?.name}!</h2>
-        <p className="mb-0">
-          {user?.role === 'teacher' 
-            ? 'Панель управления педагога' 
-            : 'Панель управления администратора'
-          }
-        </p>
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="container py-8">
+          <h1 className="page-title flex items-center gap-3">
+            <FaChartLine className="w-8 h-8" />
+            Панель управления
+          </h1>
+          <p className="page-subtitle">
+            {user?.role === 'admin' ? 'Администратор' : 'Преподаватель'} • {user?.name}
+          </p>
+        </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="mb-4">
-          {error}
-        </Alert>
-      )}
-
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card className="text-center h-100">
-            <Card.Body>
-              <FaUsers className="text-primary mb-3" size={40} />
-              <h3 className="text-primary">{stats.groups}</h3>
-              <p className="text-muted mb-0">Групп</p>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="text-center h-100">
-            <Card.Body>
-              <FaGraduationCap className="text-success mb-3" size={40} />
-              <h3 className="text-success">{stats.students}</h3>
-              <p className="text-muted mb-0">Студентов</p>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="text-center h-100">
-            <Card.Body>
-              <FaCalendarCheck className="text-warning mb-3" size={40} />
-              <h3 className="text-warning">{stats.attendance}</h3>
-              <p className="text-muted mb-0">Отчетов о посещаемости</p>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="text-center h-100">
-            <Card.Body>
-              <FaChartBar className="text-info mb-3" size={40} />
-              <h3 className="text-info">
-                {stats.recentAttendance.length}
-              </h3>
-              <p className="text-muted mb-0">Последние отчеты</p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {user?.role === 'teacher' && (
-        <Card className="mb-4">
-          <Card.Header>
-            <h5 className="mb-0">Быстрые действия</h5>
-          </Card.Header>
-          <Card.Body>
-            <Row>
-              <Col md={4}>
-                <Card className="text-center h-100 border-primary">
-                  <Card.Body>
-                    <h6>Создать группу</h6>
-                    <p className="text-muted small">
-                      Добавьте новую группу для занятий
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center h-100 border-success">
-                  <Card.Body>
-                    <h6>Добавить студента</h6>
-                    <p className="text-muted small">
-                      Зарегистрируйте нового ученика
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center h-100 border-warning">
-                  <Card.Body>
-                    <h6>Отметить посещаемость</h6>
-                    <p className="text-muted small">
-                      Создайте отчет о присутствии
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
-      )}
-
-      {user?.role === 'admin' && (
-        <Card className="mb-4">
-          <Card.Header>
-            <h5 className="mb-0">Административные функции</h5>
-          </Card.Header>
-          <Card.Body>
-            <Row>
-              <Col md={4}>
-                <Card className="text-center h-100 border-primary">
-                  <Card.Body>
-                    <h6>Управление группами</h6>
-                    <p className="text-muted small">
-                      Просмотр и управление всеми группами
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center h-100 border-success">
-                  <Card.Body>
-                    <h6>Управление студентами</h6>
-                    <p className="text-muted small">
-                      Просмотр всех студентов школы
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center h-100 border-warning">
-                  <Card.Body>
-                    <h6>Отчеты о посещаемости</h6>
-                    <p className="text-muted small">
-                      Просмотр всех отчетов о посещаемости
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
-      )}
-
-      {stats.recentAttendance.length > 0 && (
-        <Card>
-          <Card.Header>
-            <h5 className="mb-0">Последние отчеты о посещаемости</h5>
-          </Card.Header>
-          <Card.Body>
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Группа</th>
-                    <th>Дата</th>
-                    <th>Студентов</th>
-                    <th>Присутствовало</th>
-                    <th>Отправил</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recentAttendance.map((attendance) => (
-                    <tr key={attendance._id}>
-                      <td>{attendance.group?.name}</td>
-                      <td>{new Date(attendance.date).toLocaleDateString('ru-RU')}</td>
-                      <td>{attendance.students.length}</td>
-                      <td>
-                        {attendance.students.filter(s => s.present).length}
-                      </td>
-                      <td>{attendance.submittedBy?.name}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="container">
+        {error && (
+          <div className="alert alert-error mb-8">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
             </div>
-          </Card.Body>
-        </Card>
-      )}
+          </div>
+        )}
+
+        {/* Statistics Cards */}
+        <div className="stats-grid mb-8">
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
+                <FaUsers className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{stats.totalGroups}</div>
+                <div className="text-white/60 text-sm">Активных групп</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white">
+                <FaGraduationCap className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{stats.totalStudents}</div>
+                <div className="text-white/60 text-sm">Студентов</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                <FaCalendarCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{stats.recentAttendance.length}</div>
+                <div className="text-white/60 text-sm">Последние отчеты</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white">
+                <FaChartLine className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {stats.recentAttendance.reduce((total, record) => 
+                    total + (record.students?.filter(s => s.present).length || 0), 0
+                  )}
+                </div>
+                <div className="text-white/60 text-sm">Присутствий</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Quick Actions */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="text-xl font-semibold text-white mb-0 flex items-center gap-2">
+                <FaCalendarDay className="w-5 h-5" />
+                Быстрые действия
+              </h3>
+            </div>
+            <div className="card-body">
+              <div className="space-y-4">
+                <button className="interactive-card w-full p-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <FaUsers className="w-5 h-5 text-primary-400" />
+                    <div>
+                      <div className="font-medium text-white">Создать группу</div>
+                      <div className="text-sm text-white/60">Добавить новую танцевальную группу</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="interactive-card w-full p-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <FaGraduationCap className="w-5 h-5 text-green-400" />
+                    <div>
+                      <div className="font-medium text-white">Добавить студента</div>
+                      <div className="text-sm text-white/60">Зарегистрировать нового ученика</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="interactive-card w-full p-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <FaCalendarCheck className="w-5 h-5 text-purple-400" />
+                    <div>
+                      <div className="font-medium text-white">Отметить посещаемость</div>
+                      <div className="text-sm text-white/60">Создать отчет о посещаемости</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Attendance */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="text-xl font-semibold text-white mb-0 flex items-center gap-2">
+                <FaClock className="w-5 h-5" />
+                Последние отчеты
+              </h3>
+            </div>
+            <div className="card-body">
+              {stats.recentAttendance.length > 0 ? (
+                <div className="space-y-3">
+                  {stats.recentAttendance.map((record) => (
+                    <div key={record._id} className="glass-card-dark p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white text-sm">
+                            {record.group?.name || 'Неизвестная группа'}
+                          </div>
+                          <div className="text-xs text-white/60">
+                            {formatDate(record.date)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="badge badge-success text-xs">
+                            {record.students?.filter(s => s.present).length || 0} ✓
+                          </span>
+                          <span className="badge badge-danger text-xs">
+                            {record.students?.filter(s => !s.present).length || 0} ✗
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FaCalendarCheck className="w-12 h-12 text-white/30 mx-auto mb-3" />
+                  <p className="text-white/60">Нет записей о посещаемости</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Welcome Message */}
+        <div className="mt-8 hero-content">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Добро пожаловать, {user?.name}!
+          </h2>
+          <p className="text-white/80 text-lg leading-relaxed">
+            {user?.role === 'admin' 
+              ? 'Вы можете управлять всеми аспектами танцевальной школы: группами, студентами, преподавателями и расписанием.'
+              : 'Здесь вы можете управлять своими группами, отмечать посещаемость и общаться со студентами.'
+            }
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

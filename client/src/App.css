@@ -1,117 +1,140 @@
-.App {
-  min-height: 100vh;
-  background-color: #f8f9fa;
+/* App specific styles */
+
+.app {
+  @apply min-h-screen;
 }
 
-.navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.main-content {
+  @apply flex-1;
+}
+
+/* Login Page Styles */
+.login-container {
+  @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-900 via-dark-800 to-primary-900 p-4;
+}
+
+.login-card {
+  @apply w-full max-w-md p-8;
+}
+
+.login-header {
+  @apply text-center mb-8;
+}
+
+.login-header .logo {
+  @apply w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-3xl text-white;
+}
+
+.login-header h1 {
+  @apply text-2xl font-bold text-white mb-2;
+}
+
+.login-header p {
+  @apply text-white/70;
+}
+
+.login-form {
+  @apply space-y-6;
+}
+
+/* Navbar Styles */
+.navbar-container {
+  @apply container py-4 flex items-center justify-between;
 }
 
 .navbar-brand {
-  color: white !important;
-  font-weight: bold;
-  font-size: 1.5rem;
+  @apply flex items-center gap-3 text-xl font-bold text-white hover:text-primary-400 transition-colors duration-200 no-underline;
 }
 
-.nav-link {
-  color: rgba(255,255,255,0.9) !important;
-  font-weight: 500;
+.navbar-nav ul {
+  @apply hidden lg:flex items-center gap-2 list-none m-0 p-0;
 }
 
-.nav-link:hover {
-  color: white !important;
+.navbar-actions {
+  @apply flex items-center gap-4;
 }
 
-.nav-link.active {
-  color: white !important;
-  font-weight: bold;
+.user-profile {
+  @apply hidden sm:flex items-center gap-3;
 }
 
-.card {
-  transition: transform 0.2s ease-in-out;
+.user-avatar {
+  @apply w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-semibold;
 }
 
-.card:hover {
-  transform: translateY(-2px);
+.user-info {
+  @apply flex flex-col;
 }
 
-.btn {
-  border-radius: 6px;
-  font-weight: 500;
+.user-name {
+  @apply text-white font-medium text-sm;
 }
 
-.form-control {
-  border-radius: 6px;
+.user-role {
+  @apply text-white/60 text-xs capitalize;
 }
 
-.alert {
-  border-radius: 8px;
-  border: none;
+.btn-logout {
+  @apply p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 border-0 bg-transparent;
 }
 
-.table {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.mobile-menu-toggle {
+  @apply lg:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 border-0 bg-transparent;
 }
 
-.badge {
-  font-size: 0.75em;
-  padding: 0.5em 0.75em;
+/* Mobile Menu */
+.mobile-menu {
+  @apply lg:hidden absolute top-full left-0 right-0 m-4 mt-2 rounded-xl;
 }
 
-.attendance-present {
-  color: #28a745;
-  font-weight: bold;
+.mobile-nav-link {
+  @apply flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200 border-b border-white/10 last:border-b-0 no-underline;
 }
 
-.attendance-absent {
-  color: #dc3545;
-  font-weight: bold;
+.mobile-nav-link.active {
+  @apply text-white bg-white/10;
 }
 
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
-.dashboard-stats {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-}
-
-.dashboard-stats h2 {
-  color: white;
-  margin-bottom: 1rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
+/* Dashboard Styles */
 .stat-card {
-  background: rgba(255,255,255,0.1);
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
+  @apply hover:scale-105 transition-transform duration-300;
 }
 
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+.stat-icon {
+  @apply w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center text-white;
+}
+
+.stat-value {
+  @apply text-2xl font-bold text-white;
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  opacity: 0.9;
+  @apply text-white/60 text-sm;
+}
+
+.action-card {
+  @apply hover:scale-105 transition-all duration-300 no-underline text-white;
+}
+
+.action-card:hover {
+  @apply text-white no-underline;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .stats-grid {
+    @apply grid-cols-1;
+  }
+  
+  .action-grid {
+    @apply grid-cols-1;
+  }
+  
+  .page-title {
+    @apply text-2xl;
+  }
+  
+  .container {
+    @apply px-4;
+  }
 } 

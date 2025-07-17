@@ -73,8 +73,14 @@ router.get('/', authenticateToken, async (req, res) => {
       }
 
       // Проверяем права доступа для учителей
-      if (req.user.role === 'teacher' && groupDoc.teacher.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied' });
+      if (req.user.role === 'teacher') {
+        const isTeacherInGroup = groupDoc.teachers.some(teacher => 
+          teacher.toString() === req.user._id.toString()
+        ) || (groupDoc.teacher && groupDoc.teacher.toString() === req.user._id.toString());
+        
+        if (!isTeacherInGroup) {
+          return res.status(403).json({ message: 'Access denied' });
+        }
       }
 
       students = await Student.find({
@@ -82,13 +88,7 @@ router.get('/', authenticateToken, async (req, res) => {
         ...filter
       }).populate('groups', 'name room dayOfWeek time');
     } else {
-      // Если пользователь - учитель, показываем только студентов его групп
-      if (req.user.role === 'teacher') {
-        const teacherGroups = await Group.find({ teacher: req.user._id });
-        const studentIds = teacherGroups.flatMap(group => group.students);
-        filter._id = { $in: studentIds };
-      }
-
+      // НОВАЯ ЛОГИКА: Все пользователи видят всех студентов
       students = await Student.find(filter).populate('groups', 'name room dayOfWeek time');
     }
 
@@ -126,7 +126,7 @@ router.post('/', [
   authenticateToken,
   requireRole(['teacher', 'admin']),
   body('name').notEmpty().withMessage('Student name is required'),
-  body('phone').optional().isMobilePhone().withMessage('Invalid phone number')
+  body('phone').optional().trim()
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -231,7 +231,7 @@ router.put('/:studentId', [
   authenticateToken,
   requireRole(['teacher', 'admin']),
   body('name').optional().notEmpty().withMessage('Student name cannot be empty'),
-  body('phone').optional().isMobilePhone().withMessage('Invalid phone number')
+  body('phone').optional().trim()
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

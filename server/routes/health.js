@@ -3,6 +3,45 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api:
+ *   get:
+ *     summary: Информация об API
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Информация об API
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 version:
+ *                   type: string
+ *                 endpoints:
+ *                   type: object
+ */
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Dance School API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      groups: '/api/groups', 
+      students: '/api/students',
+      attendance: '/api/attendance',
+      health: '/api/health',
+      metrics: '/api/metrics',
+      docs: '/api-docs'
+    },
+    status: 'running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+/**
+ * @swagger
  * /api/health:
  *   get:
  *     summary: Проверка здоровья сервера
