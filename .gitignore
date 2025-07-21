@@ -117,6 +117,27 @@ backup-*/
 # Test files
 test-*.js
 *-test.js
+parse-*.js
+get-students-*.js
+analyze-*.js
+
+# Swift files
+*.swift
+
+# Shell scripts
+*.sh
+
+# Documentation files (keep only README.md and CHAT_LOGO_FIX.md)
+HOW_TO_PARSE_SERVER_DATA.md
+PARSE_INSTRUCTIONS.md
+SWIFT_PARSING_GUIDE.md
+SWIFT_README.md
+DATABASE_MODELS.md
+DEPLOY_FIXES.md
+DEPLOY_INSTRUCTIONS.md
+PROJECT_OVERVIEW.md
+SUMMARY.md
+FINAL_DEPLOYMENT.md
 
 # Documentation builds
 docs/build/
