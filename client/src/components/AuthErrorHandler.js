@@ -33,8 +33,8 @@ const AuthErrorHandler = ({ error, onRetry, onLogout }) => {
             >
               Выйти из системы
             </button>
-          )}
-        </div>
+            )}
+          </div>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import {
   FaCalendarCheck, FaComments, FaUser, FaSignOutAlt, FaMusic,
   FaBars, FaTimes
 } from 'react-icons/fa';
+import logo from '../logo-2.svg';
 
 const navItems = [
   { path: '/dashboard', label: 'Главная', icon: FaHome },
@@ -37,32 +38,26 @@ const Navbar = () => {
       <div className="container">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-dance-500 rounded-full flex items-center justify-center">
-              <FaMusic className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Школа Танцев</h1>
-              <p className="text-xs text-white/60">Система управления</p>
-            </div>
-          </div>
+          <NavLink to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
+            <img src={logo} alt="Школа Танцев" className="w-12 h-12 filter brightness-0 invert" />
+          </NavLink>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
             {filteredNavItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
+      const Icon = item.icon;
+      return (
+          <NavLink 
                   key={item.path}
-                  to={item.path}
+            to={item.path} 
                   className={({ isActive }) =>
                     `nav-link ${isActive ? 'active' : ''}`
                   }
-                >
+          >
                   <Icon className="w-4 h-4" />
                   <span className="text-sm">{item.label}</span>
-                </NavLink>
-              );
+          </NavLink>
+      );
             })}
           </div>
 
@@ -79,12 +74,12 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
-            <button
+            <button 
               onClick={handleLogout}
               className="btn btn-outline btn-sm"
+              title="Выйти"
             >
               <FaSignOutAlt className="w-4 h-4" />
-              <span>Выйти</span>
             </button>
           </div>
 

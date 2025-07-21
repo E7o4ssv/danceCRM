@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Base URL для API
-const API_BASE_URL = 'http://localhost:3001';
+// Base URL для API - автоматически определяется по среде
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'http://89.104.71.170:5000'  // Продакшн сервер
+  : (process.env.REACT_APP_API_URL || 'http://localhost:3001'); // Development или переменная окружения
+
+console.log('API_BASE_URL:', API_BASE_URL, 'NODE_ENV:', process.env.NODE_ENV);
 
 // Создаем экземпляр axios с базовой конфигурацией
 const api = axios.create({

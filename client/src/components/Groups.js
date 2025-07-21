@@ -24,6 +24,10 @@ const Groups = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChatGroup, setSelectedChatGroup] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     room: '',
@@ -83,7 +87,7 @@ const Groups = () => {
   };
 
   const handleCreate = () => {
-    setEditingGroup(null);
+      setEditingGroup(null);
     setFormData({
       name: '',
       room: '',
@@ -124,6 +128,55 @@ const Groups = () => {
     }
   };
 
+  // Добавить/удалить ученика из группы
+  const handleStudentToggle = async (studentId, checked) => {
+    if (!editingGroup) return;
+    try {
+      if (checked) {
+        // Добавить ученика
+        await api.post(`/api/groups/${editingGroup._id}/students`, { studentId });
+      } else {
+        // Удалить ученика
+        await api.delete(`/api/groups/${editingGroup._id}/students/${studentId}`);
+      }
+      await fetchGroups();
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка при изменении учеников группы');
+    }
+  };
+
+  // Открыть чат группы
+  const handleOpenChat = async (group) => {
+    setSelectedChatGroup(group);
+    setShowChatModal(true);
+    await fetchChatMessages(group._id);
+  };
+
+  // Получить сообщения чата
+  const fetchChatMessages = async (groupId) => {
+    try {
+      const response = await api.get(`/api/chat/group/${groupId}`);
+      setChatMessages(response.data.messages || []);
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+    }
+  };
+
+  // Отправить сообщение
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedChatGroup) return;
+    
+    try {
+      await api.post(`/api/chat/group/${selectedChatGroup._id}/messages`, {
+        content: newMessage
+      });
+      setNewMessage('');
+      await fetchChatMessages(selectedChatGroup._id);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -134,40 +187,28 @@ const Groups = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaUsers />
-            Группы
-          </h1>
-          <p className="page-subtitle">
-            Управление группами и расписанием
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
+      <div className="container pt-8">
         {error && (
           <div className="alert alert-error mb-6">
             {error}
-          </div>
+        </div>
         )}
-
+        
         {user?.role === 'admin' && (
           <div className="mb-6">
             <button 
               onClick={handleCreate}
               className="btn btn-primary"
-            >
+          >
               <FaPlus className="mr-2" />
-              Создать группу
+            Создать группу
             </button>
           </div>
-        )}
+      )}
 
-        {/* Groups Grid */}
+      {/* Groups Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groups.map((group) => (
+        {groups.map((group) => (
             <div key={group._id} className="card hover:scale-105 transition-transform duration-200">
               <div className="card-header">
                 <div className="flex items-center justify-between">
@@ -195,8 +236,8 @@ const Groups = () => {
                   <div className="flex items-center gap-2 text-white/80">
                     <FaClock />
                     <span>{group.time}</span>
-                  </div>
-                  
+                </div>
+
                   <div className="flex items-center gap-2 text-white/80">
                     <FaUsers />
                     <span>{group.students?.length || 0} студентов</span>
@@ -209,11 +250,11 @@ const Groups = () => {
                           {teacher.name}
                         </span>
                       ))}
-                    </div>
-                  )}
+                        </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              
+
               <div className="card-footer">
                 <div className="flex gap-2">
                   <button
@@ -235,7 +276,7 @@ const Groups = () => {
                   )}
                   
                   <button
-                    onClick={() => {/* TODO: Open chat */}}
+                    onClick={() => handleOpenChat(group)}
                     className="btn btn-sm bg-purple-600 hover:bg-purple-700 text-white"
                     title="Чат группы"
                   >
@@ -244,20 +285,20 @@ const Groups = () => {
                 </div>
               </div>
             </div>
-          ))}
-          
-          {groups.length === 0 && (
+        ))}
+        
+        {groups.length === 0 && (
             <div className="col-span-full text-center py-12">
               <FaUsers className="mx-auto mb-4 text-white/40" size={64} />
               <p className="text-white/60 text-lg">Группы не найдены</p>
-              {user?.role === 'admin' && (
+                {user?.role === 'admin' && (
                 <button 
                   onClick={handleCreate}
                   className="btn btn-primary mt-4"
                 >
                   Создать первую группу
                 </button>
-              )}
+                )}
             </div>
           )}
         </div>
@@ -283,11 +324,11 @@ const Groups = () => {
               <div className="form-group">
                 <label className="form-label">Название группы</label>
                 <input
-                  type="text"
+                    type="text"
                   className="form-control"
-                  value={formData.name}
+                    value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
+                    required
                 />
               </div>
 
@@ -326,22 +367,51 @@ const Groups = () => {
                     <option key={key} value={key}>{value}</option>
                   ))}
                 </select>
-              </div>
+                </div>
 
               <div className="form-group">
                 <label className="flex items-center gap-2">
                   <input
-                    type="checkbox"
-                    checked={formData.isActive}
+                type="checkbox"
+                checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  />
+              />
                   <span className="text-white">Активная группа</span>
                 </label>
               </div>
 
+              {/* Новый блок: управление учениками */}
+              {editingGroup && (
+                <div className="form-group">
+                  <label className="form-label">Ученики в группе</label>
+                  <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white/5">
+                    {students.length > 0 ? (
+                      students.map(student => (
+                        <label key={student._id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-white/10 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={editingGroup.students?.some(s => s._id === student._id)}
+                            onChange={e => handleStudentToggle(student._id, e.target.checked)}
+                          />
+                          <span className="text-white/90">{student.name}</span>
+                          {student.phone && (
+                            <span className="text-white/60 text-xs">({student.phone})</span>
+                          )}
+                        </label>
+                      ))
+                    ) : (
+                      <p className="text-white/60 text-sm">Нет доступных учеников</p>
+                    )}
+                  </div>
+                  <p className="text-white/60 text-xs mt-1">
+                    Выберите учеников для добавления в группу
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-3 mt-6">
                 <button type="submit" className="btn btn-primary">
-                  {editingGroup ? 'Сохранить' : 'Создать'}
+            {editingGroup ? 'Сохранить' : 'Создать'}
                 </button>
                 <button 
                   type="button" 
@@ -350,8 +420,71 @@ const Groups = () => {
                 >
                   Отмена
                 </button>
-              </div>
+                                </div>
             </form>
+                  </div>
+                </div>
+      )}
+
+      {/* Chat Modal */}
+      {showChatModal && selectedChatGroup && (
+        <div className="modal-overlay" onClick={() => setShowChatModal(false)}>
+          <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                Чат группы: {selectedChatGroup.name}
+              </h3>
+              <button 
+                onClick={() => setShowChatModal(false)}
+                className="modal-close"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex flex-col h-96">
+              {/* Сообщения */}
+              <div className="flex-1 overflow-y-auto p-4 bg-white/5 rounded mb-4">
+                {chatMessages.length > 0 ? (
+                  chatMessages.map((message, index) => (
+                    <div key={index} className="mb-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-white/80 text-sm font-medium">
+                          {message.sender?.name || 'Неизвестный'}
+                        </span>
+                        <span className="text-white/40 text-xs">
+                          {new Date(message.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-white/10 p-2 rounded">
+                        <p className="text-white">{message.content}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-white/60 text-center">Нет сообщений</p>
+                )}
+              </div>
+              
+              {/* Форма отправки */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Введите сообщение..."
+                  className="form-control flex-1"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  className="btn btn-primary"
+                  disabled={!newMessage.trim()}
+                >
+                  Отправить
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

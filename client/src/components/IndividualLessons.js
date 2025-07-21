@@ -140,20 +140,8 @@ const IndividualLessons = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaUser />
-            Индивидуальные занятия
-          </h1>
-          <p className="page-subtitle">
-            Персональные уроки для 1-2 студентов
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
-        {error && (
+      <div className="container pt-8">
+      {error && (
           <div className="alert alert-error mb-6">
             {error}
           </div>
@@ -169,11 +157,11 @@ const IndividualLessons = () => {
               Создать индивидуальное занятие
             </button>
           </div>
-        )}
+      )}
 
-        {/* Lessons Grid */}
+      {/* Lessons Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {lessons.map((lesson) => (
+        {lessons.map((lesson) => (
             <div key={lesson._id} className="card">
               <div className="card-header">
                 <div className="flex items-center justify-between">
@@ -185,7 +173,7 @@ const IndividualLessons = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="card-body">
                 <div className="space-y-3">
                   {lesson.teacher && (
@@ -208,8 +196,8 @@ const IndividualLessons = () => {
                   <div className="flex items-center gap-2 text-white/80">
                     <FaUserPlus />
                     <span>{lesson.students?.length || 0} студентов</span>
-                  </div>
-                  
+                </div>
+
                   {lesson.price && (
                     <div className="flex items-center gap-2 text-white/80">
                       <FaRubleSign />
@@ -221,15 +209,15 @@ const IndividualLessons = () => {
                     <div className="mt-3">
                       <p className="text-white/80 text-sm mb-2">Расписание:</p>
                       <div className="space-y-1">
-                        {lesson.schedule.map((item, index) => (
+                  {lesson.schedule.map((item, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
                             <FaCalendarAlt className="text-white/60" />
                             <span className="text-white/80">
-                              {daysOfWeek[item.dayOfWeek]} в {item.time}
+                      {daysOfWeek[item.dayOfWeek]} в {item.time}
                             </span>
-                          </div>
-                        ))}
-                      </div>
+                    </div>
+                  ))}
+                </div>
                     </div>
                   )}
                   
@@ -246,7 +234,7 @@ const IndividualLessons = () => {
                     </div>
                   )}
                 </div>
-              </div>
+                  </div>
               
               <div className="card-footer">
                 <div className="flex gap-2">
@@ -273,9 +261,9 @@ const IndividualLessons = () => {
                 </div>
               </div>
             </div>
-          ))}
-          
-          {lessons.length === 0 && (
+        ))}
+        
+        {lessons.length === 0 && (
             <div className="col-span-full text-center py-12">
               <FaUser className="mx-auto mb-4 text-white/40" size={64} />
               <p className="text-white/60 text-lg">Индивидуальные занятия не найдены</p>
@@ -312,9 +300,9 @@ const IndividualLessons = () => {
               <div className="form-group">
                 <label className="form-label">Название занятия</label>
                 <input
-                  type="text"
+                    type="text"
                   className="form-control"
-                  value={formData.name}
+                    value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
@@ -368,11 +356,11 @@ const IndividualLessons = () => {
               <div className="form-group">
                 <label className="form-label">Стоимость (₽)</label>
                 <input
-                  type="number"
+                    type="number"
                   className="form-control"
-                  value={formData.price}
+                    value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  min="0"
+                    min="0"
                 />
               </div>
 
@@ -381,10 +369,10 @@ const IndividualLessons = () => {
                 <textarea
                   className="form-control"
                   rows="3"
-                  value={formData.notes}
+                value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Дополнительная информация о занятии"
-                />
+                placeholder="Дополнительная информация о занятии"
+              />
               </div>
 
               <div className="flex gap-3 mt-6">
@@ -395,13 +383,13 @@ const IndividualLessons = () => {
                   type="button" 
                   onClick={() => setShowModal(false)}
                   className="btn btn-outline"
-                >
-                  Отмена
+              >
+                Отмена
                 </button>
               </div>
             </form>
           </div>
-        </div>
+            </div>
       )}
     </div>
   );

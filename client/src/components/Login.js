@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaGraduationCap, FaSpinner, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
+import logo from '../logo-2.svg';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -51,12 +52,9 @@ const Login = () => {
       <div className="glass-modal w-full max-w-md relative z-10 animate-scale-in">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-500 to-dance-500 rounded-full mb-4 shadow-dance animate-float">
-            <FaMusic className="w-5 h-5 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 shadow-dance animate-float">
+            <img src={logo} alt="Школа Танцев" className="w-20 h-20 filter brightness-0 invert" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Школа Танцев
-          </h1>
           <p className="text-lg text-white/80">Войдите в свой аккаунт</p>
         </div>
 
@@ -99,15 +97,15 @@ const Login = () => {
               Пароль
             </label>
             <div className="relative">
-              <input
+            <input
                 type={showPassword ? 'text' : 'password'}
-                name="password"
+              name="password"
                 className="form-control pr-14 text-lg py-4 px-4"
                 placeholder="Введите ваш пароль"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                disabled={loading}
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
               />
               <button
                 type="button"
@@ -153,15 +151,6 @@ const Login = () => {
             </svg>
             Создать аккаунт
           </Link>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-8 p-6 glass-card-dark rounded-lg">
-          <h3 className="text-lg font-semibold text-white/95 mb-3">Демо-доступ:</h3>
-          <div className="text-base text-white/80 space-y-2">
-            <div><strong className="text-white/95">Админ:</strong> admin2 / admin123</div>
-            <div><strong className="text-white/95">Учитель:</strong> teacher / teacher123</div>
-          </div>
         </div>
       </div>
 

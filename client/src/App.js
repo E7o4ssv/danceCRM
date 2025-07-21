@@ -124,8 +124,8 @@ function AppContent() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-          </Routes>
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
         </main>
       </div>
     </Router>

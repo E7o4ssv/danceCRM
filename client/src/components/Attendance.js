@@ -3,11 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import { 
   FaCalendarCheck,
-  FaPlus,
+  FaPlus, 
   FaUsers,
   FaCheckCircle,
   FaTimesCircle,
-  FaCalendar,
+  FaCalendar, 
   FaClock
 } from 'react-icons/fa';
 
@@ -64,24 +64,12 @@ const Attendance = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaCalendarCheck />
-            Посещаемость
-          </h1>
-          <p className="page-subtitle">
-            Отчеты о посещаемости занятий
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
-        {error && (
+      <div className="container pt-8">
+      {error && (
           <div className="alert alert-error mb-6">
             {error}
           </div>
-        )}
+      )}
 
         {/* Attendance Records */}
         <div className="card">
@@ -103,36 +91,36 @@ const Attendance = () => {
               </thead>
               <tbody>
                 {attendanceRecords.map((record) => (
-                  <tr key={record._id}>
-                    <td>
+                    <tr key={record._id}>
+                      <td>
                       <div className="flex items-center gap-2">
                         <FaClock size={14} className="text-white/60" />
                         {formatDate(record.date)}
                       </div>
-                    </td>
+                      </td>
                     <td className="text-primary-400">
                       {record.group?.name || 'Группа удалена'}
-                    </td>
-                    <td>
+                      </td>
+                      <td>
                       <div className="flex items-center gap-2">
                         <FaCheckCircle className="text-green-400" />
                         <span className="text-green-400">
                           {record.students?.filter(s => s.present).length || 0}
                         </span>
                       </div>
-                    </td>
-                    <td>
+                      </td>
+                      <td>
                       <div className="flex items-center gap-2">
                         <FaTimesCircle className="text-red-400" />
                         <span className="text-red-400">
                           {record.students?.filter(s => !s.present).length || 0}
                         </span>
                       </div>
-                    </td>
+                      </td>
                     <td className="text-white/80">
                       {record.submittedBy?.name || 'Неизвестно'}
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
                 ))}
                 {attendanceRecords.length === 0 && (
                   <tr>
@@ -194,9 +182,9 @@ const Attendance = () => {
                   <div className="text-white/60 text-sm">Пропусков</div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+                </div>
+              </div>
+            )}
       </div>
     </div>
   );

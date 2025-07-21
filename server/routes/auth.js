@@ -357,4 +357,73 @@ router.put('/users/:userId', [
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/users/{userId}/status:
+ *   put:
+ *     summary: Обновить статус активности пользователя (только админ)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               isActive:
+ *                 type: boolean
+ *                 description: Статус активности пользователя
+ *     responses:
+ *       200:
+ *         description: Статус пользователя обновлён
+ *       403:
+ *         description: Доступ запрещён
+ *       404:
+ *         description: Пользователь не найден
+ */
+router.put('/users/:userId/status', [
+  authenticateToken,
+  requireRole(['admin']),
+  body('isActive').isBoolean().withMessage('isActive must be a boolean')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { isActive } = req.body;
+    const userId = req.params.userId;
+
+    // Проверяем, что пользователь существует
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Обновляем статус активности
+    user.isActive = isActive;
+    await user.save();
+
+    // Возвращаем пользователя без пароля
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json({
+      message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+      user: userResponse
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router; 

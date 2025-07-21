@@ -200,110 +200,13 @@ router.post('/group/:groupId/messages', [
     };
 
     chat.messages.push(newMessage);
+    chat.lastActivity = new Date();
     await chat.save();
 
-    // Заполняем данные отправителя
+    await chat.populate('participants', 'name username role');
     await chat.populate('messages.sender', 'name username role');
-    
-    // Возвращаем только последнее сообщение
-    const lastMessage = chat.messages[chat.messages.length - 1];
 
-    res.status(201).json(lastMessage);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/group/{groupId}/messages/{messageId}/read:
- *   put:
- *     summary: Отметить сообщение как прочитанное
- *     tags: [Chat]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: groupId
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: messageId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Сообщение отмечено как прочитанное
- *       404:
- *         description: Сообщение не найдено
- */
-router.put('/group/:groupId/messages/:messageId/read', authenticateToken, async (req, res) => {
-  try {
-    const { groupId, messageId } = req.params;
-
-    const chat = await Chat.findOne({ group: groupId });
-    if (!chat) {
-      return res.status(404).json({ message: 'Chat not found' });
-    }
-
-    const message = chat.messages.id(messageId);
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    message.isRead = true;
-    await chat.save();
-
-    res.json({ message: 'Message marked as read' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/my-chats:
- *   get:
- *     summary: Получить все чаты пользователя
- *     tags: [Chat]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Список чатов пользователя
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Chat'
- */
-router.get('/my-chats', authenticateToken, async (req, res) => {
-  try {
-    let filter = {};
-
-    if (req.user.role === 'admin') {
-      // Админ видит все чаты
-      filter = {};
-    } else if (req.user.role === 'teacher') {
-      // Учитель видит только чаты своих групп
-      filter = { participants: req.user._id };
-    } else {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
-    const chats = await Chat.find(filter)
-      .populate('group', 'name room dayOfWeek time')
-      .populate('participants', 'name username role')
-      .populate({
-        path: 'messages.sender',
-        select: 'name username role'
-      })
-      .sort({ lastActivity: -1 });
-
-    res.json(chats);
+    res.status(201).json(chat);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

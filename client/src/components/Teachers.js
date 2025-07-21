@@ -62,6 +62,16 @@ const Teachers = () => {
     );
   };
 
+  // Смена статуса преподавателя
+  const handleToggleActive = async (teacher) => {
+    try {
+      await api.put(`/api/auth/users/${teacher._id}/status`, { isActive: !teacher.isActive });
+      await fetchTeachers();
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка при смене статуса преподавателя');
+    }
+  };
+
   if (user?.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -84,31 +94,19 @@ const Teachers = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaChalkboardTeacher />
-            Преподаватели
-          </h1>
-          <p className="page-subtitle">
-            Управление преподавательским составом
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
-        {error && (
+      <div className="container pt-8">
+      {error && (
           <div className="alert alert-error mb-6">
-            {error}
+          {error}
           </div>
-        )}
+      )}
 
-        {/* Teachers Grid */}
+      {/* Teachers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {teachers.map((teacher) => {
-            const teacherGroups = getTeacherGroups(teacher._id);
+          const teacherGroups = getTeacherGroups(teacher._id);
             
-            return (
+          return (
               <div key={teacher._id} className="card">
                 <div className="card-header">
                   <div className="flex items-center justify-between">
@@ -127,8 +125,8 @@ const Teachers = () => {
                       {teacher.isActive ? 'Активен' : 'Неактивен'}
                     </span>
                   </div>
-                </div>
-                
+                  </div>
+
                 <div className="card-body">
                   <div className="space-y-3">
                     {teacher.phone && (
@@ -148,23 +146,23 @@ const Teachers = () => {
                     <div className="flex items-center gap-2 text-white/80">
                       <FaUsers />
                       <span>{teacherGroups.length} групп</span>
-                    </div>
-                    
+                  </div>
+
                     {teacherGroups.length > 0 && (
                       <div className="mt-3">
                         <p className="text-white/80 text-sm mb-2">Группы:</p>
                         <div className="flex flex-wrap gap-1">
                           {teacherGroups.map(group => (
                             <span key={group._id} className="badge badge-info text-xs">
-                              {group.name}
+                            {group.name}
                             </span>
-                          ))}
+                        ))}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
-                
+                  </div>
+
                 <div className="card-footer">
                   <div className="flex gap-2">
                     <button
@@ -179,13 +177,21 @@ const Teachers = () => {
                     >
                       <FaEdit />
                     </button>
+                    {/* Toggle активен/неактивен */}
+                    <button
+                      className={`btn btn-sm ${teacher.isActive ? 'bg-gray-400 hover:bg-gray-500' : 'bg-yellow-600 hover:bg-yellow-700'} text-white`}
+                      title={teacher.isActive ? 'Сделать неактивным' : 'Сделать активным'}
+                      onClick={() => handleToggleActive(teacher)}
+                    >
+                      {teacher.isActive ? <FaTimes /> : <FaCheck />}
+                    </button>
                   </div>
                 </div>
               </div>
-            );
-          })}
-          
-          {teachers.length === 0 && (
+          );
+        })}
+
+      {teachers.length === 0 && (
             <div className="col-span-full text-center py-12">
               <FaChalkboardTeacher className="mx-auto mb-4 text-white/40" size={64} />
               <p className="text-white/60 text-lg">Преподаватели не найдены</p>

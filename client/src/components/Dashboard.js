@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import { 
@@ -12,6 +13,7 @@ import {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalGroups: 0,
     totalStudents: 0,
@@ -66,19 +68,7 @@ const Dashboard = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaChartLine className="w-8 h-8" />
-            Панель управления
-          </h1>
-          <p className="page-subtitle">
-            {user?.role === 'admin' ? 'Администратор' : 'Преподаватель'} • {user?.name}
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
+      <div className="container pt-8">
         {error && (
           <div className="alert alert-error mb-8">
             <div className="flex items-center gap-2">
@@ -157,7 +147,10 @@ const Dashboard = () => {
             </div>
             <div className="card-body">
               <div className="space-y-4">
-                <button className="interactive-card w-full p-4 text-left">
+                <button 
+                  className="interactive-card w-full p-4 text-left"
+                  onClick={() => navigate('/groups')}
+                >
                   <div className="flex items-center gap-3">
                     <FaUsers className="w-5 h-5 text-primary-400" />
                     <div>
@@ -167,7 +160,10 @@ const Dashboard = () => {
                   </div>
                 </button>
 
-                <button className="interactive-card w-full p-4 text-left">
+                <button 
+                  className="interactive-card w-full p-4 text-left"
+                  onClick={() => navigate('/students')}
+                >
                   <div className="flex items-center gap-3">
                     <FaGraduationCap className="w-5 h-5 text-green-400" />
                     <div>
@@ -177,7 +173,10 @@ const Dashboard = () => {
                   </div>
                 </button>
 
-                <button className="interactive-card w-full p-4 text-left">
+                <button 
+                  className="interactive-card w-full p-4 text-left"
+                  onClick={() => navigate('/attendance')}
+                >
                   <div className="flex items-center gap-3">
                     <FaCalendarCheck className="w-5 h-5 text-purple-400" />
                     <div>
@@ -209,7 +208,7 @@ const Dashboard = () => {
                             {record.group?.name || 'Неизвестная группа'}
                           </div>
                           <div className="text-xs text-white/60">
-                            {formatDate(record.date)}
+                          {formatDate(record.date)}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -219,18 +218,18 @@ const Dashboard = () => {
                           <span className="badge badge-danger text-xs">
                             {record.students?.filter(s => !s.present).length || 0} ✗
                           </span>
-                        </div>
-                      </div>
-                    </div>
+              </div>
+            </div>
+          </div>
                   ))}
-                </div>
+              </div>
               ) : (
                 <div className="text-center py-8">
                   <FaCalendarCheck className="w-12 h-12 text-white/30 mx-auto mb-3" />
                   <p className="text-white/60">Нет записей о посещаемости</p>
-                </div>
+              </div>
               )}
-            </div>
+              </div>
           </div>
         </div>
 

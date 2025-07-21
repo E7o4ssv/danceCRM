@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaMusic, FaUser, FaSpinner } from 'react-icons/fa';
+import logo from '../logo-2.svg';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
       return;
@@ -54,20 +55,19 @@ const Register = () => {
       <div className="login-card max-w-lg">
         <div className="login-header">
           <div className="logo">
-            <FaMusic />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Школа Танцев</h2>
+            <img src={logo} alt="Школа Танцев" className="w-16 h-16 filter brightness-0 invert" />
+                  </div>
           <p className="text-white/70">Регистрация в системе управления</p>
-        </div>
+              </div>
 
-        {error && (
+              {error && (
           <div className="alert alert-error mb-6">
             <div className="flex items-center">
               <FaUser className="mr-2" />
-              {error}
-            </div>
+                    {error}
+                  </div>
           </div>
-        )}
+              )}
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,15 +90,15 @@ const Register = () => {
               <label htmlFor="username" className="form-label">Имя пользователя</label>
               <input
                 id="username"
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
+                        type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        required
                 placeholder="teacher123"
                 disabled={loading}
                 className="form-control"
-              />
+                      />
             </div>
           </div>
 
@@ -109,7 +109,7 @@ const Register = () => {
               type="tel"
               name="phone"
               value={formData.phone}
-              onChange={handleChange}
+                        onChange={handleChange}
               placeholder="+7 (999) 123-45-67"
               disabled={loading}
               className="form-control"
@@ -136,26 +136,26 @@ const Register = () => {
               <label htmlFor="password" className="form-label">Пароль</label>
               <input
                 id="password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
                 placeholder="••••••••"
                 disabled={loading}
                 className="form-control"
-              />
+                      />
             </div>
 
             <div className="form-group">
               <label htmlFor="confirmPassword" className="form-label">Подтвердите пароль</label>
               <input
                 id="confirmPassword"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
                 placeholder="••••••••"
                 disabled={loading}
                 className="form-control"
@@ -164,25 +164,25 @@ const Register = () => {
           </div>
 
           <button 
-            type="submit" 
-            disabled={loading} 
+                  type="submit"
+                  disabled={loading}
             className="btn btn-primary w-full"
-          >
+                >
             {loading ? <FaSpinner className="spinner" /> : 'Зарегистрироваться'}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-white/70">
-            Уже есть аккаунт?{' '}
-            <Link 
-              to="/login" 
+                    Уже есть аккаунт?{' '}
+                    <Link 
+                      to="/login" 
               className="text-primary-400 hover:text-primary-300 transition-colors duration-200"
-            >
-              Войти
-            </Link>
-          </p>
-        </div>
+                    >
+                      Войти
+                    </Link>
+                  </p>
+                </div>
       </div>
     </div>
   );

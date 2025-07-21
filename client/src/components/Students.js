@@ -92,7 +92,7 @@ const Students = () => {
         await api.post('/api/students', formData);
       }
       await fetchStudents();
-      setShowModal(false);
+    setShowModal(false);
       setError('');
     } catch (error) {
       setError(error.response?.data?.message || 'Ошибка при сохранении студента');
@@ -122,19 +122,7 @@ const Students = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="container py-8">
-          <h1 className="page-title flex items-center gap-3">
-            <FaGraduationCap />
-            Студенты
-          </h1>
-          <p className="page-subtitle">
-            Управление базой данных студентов
-          </p>
-        </div>
-      </div>
-
-      <div className="container">
+      <div className="container pt-8">
         {error && (
           <div className="alert alert-error mb-6">
             {error}
@@ -150,7 +138,7 @@ const Students = () => {
             <FaPlus className="mr-2" />
             Добавить студента
           </button>
-        </div>
+      </div>
 
         {/* Students Table */}
         <div className="card">
@@ -172,59 +160,59 @@ const Students = () => {
               </thead>
               <tbody>
                 {students.map((student) => (
-                  <tr key={student._id}>
+                    <tr key={student._id}>
                     <td className="font-medium text-white">
                       {student.name}
-                    </td>
-                    <td>
-                      {student.phone ? (
+                      </td>
+                      <td>
+                        {student.phone ? (
                         <div className="flex items-center gap-2">
                           <FaPhone size={12} />
-                          {student.phone}
-                        </div>
-                      ) : (
+                            {student.phone}
+                          </div>
+                        ) : (
                         <span className="text-white/40">Не указан</span>
-                      )}
-                    </td>
-                    <td>
+                        )}
+                      </td>
+                      <td>
                       {student.groups?.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {student.groups.map(group => (
                             <span key={group._id} className="badge badge-info">
-                              {group.name}
+                                {group.name}
                             </span>
-                          ))}
-                        </div>
-                      ) : (
+                            ))}
+                          </div>
+                        ) : (
                         <span className="text-white/40">Нет групп</span>
-                      )}
-                    </td>
-                    <td>
+                        )}
+                      </td>
+                      <td>
                       <span className={`badge ${student.isActive ? 'badge-success' : 'badge-danger'}`}>
                         {student.isActive ? 'Активен' : 'Неактивен'}
                       </span>
-                    </td>
-                    <td>
+                      </td>
+                      <td>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEdit(student)}
+                              onClick={() => handleEdit(student)}
                           className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white"
-                          title="Редактировать"
-                        >
-                          <FaEdit />
+                              title="Редактировать"
+                            >
+                              <FaEdit />
                         </button>
-                        {user?.role === 'admin' && (
+                          {user?.role === 'admin' && (
                           <button
-                            onClick={() => handleDelete(student._id)}
+                              onClick={() => handleDelete(student._id)}
                             className="btn btn-sm bg-red-600 hover:bg-red-700 text-white"
-                            title="Удалить"
-                          >
-                            <FaTrash />
+                              title="Удалить"
+                            >
+                              <FaTrash />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                 ))}
                 {students.length === 0 && (
                   <tr>
@@ -262,32 +250,32 @@ const Students = () => {
               <div className="form-group">
                 <label className="form-label">Имя студента</label>
                 <input
-                  type="text"
+                    type="text"
                   className="form-control"
-                  value={formData.name}
+                    value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
+                    required
+                  />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Телефон</label>
                 <input
-                  type="tel"
+                    type="tel"
                   className="form-control"
-                  value={formData.phone}
+                    value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+7 (999) 123-45-67"
+                    placeholder="+7 (999) 123-45-67"
                 />
               </div>
 
               <div className="form-group">
                 <label className="flex items-center gap-2">
                   <input
-                    type="checkbox"
-                    checked={formData.isActive}
+                type="checkbox"
+                checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  />
+              />
                   <span className="text-white">Активный студент</span>
                 </label>
               </div>
@@ -301,7 +289,7 @@ const Students = () => {
                   onClick={() => setShowModal(false)}
                   className="btn btn-outline"
                 >
-                  Отмена
+            Отмена
                 </button>
               </div>
             </form>
